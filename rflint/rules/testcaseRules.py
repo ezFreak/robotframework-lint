@@ -102,3 +102,26 @@ class TooManyTestSteps(TestRule):
             self.report(testcase,
                         "Too many steps (%s) in test case" % len(steps),
                         steps[self.max_allowed].startline)
+
+class ForLoopNotAllowedInTestCase(TestRule):
+    '''Workflow tests should have no for loop in test case.
+    A for loop should only be used in user keywords.
+
+    This rule is not enforced for data driven tests ("Test Template" in Settings)
+
+    https://github.com/robotframework/HowToWriteGoodTestCases/blob/master/HowToWriteGoodTestCases.rst#workflow-tests
+    '''
+    severity=WARNING
+
+    def apply(self, testcase):
+        if testcase.is_templated:
+            return
+
+        for steps in testcase.steps:
+            try:
+                if steps[1].lower() == ':FOR'.lower():
+                    self.report(testcase,
+                            "Violation of using for-loop in test case",
+                            steps.startline)
+            except IndexError:
+                pass
