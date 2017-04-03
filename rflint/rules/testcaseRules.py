@@ -135,6 +135,8 @@ class IfElseNotAllowedInTestCase(TestRule):
     https://github.com/robotframework/HowToWriteGoodTestCases/blob/master/HowToWriteGoodTestCases.rst#workflow-tests
     '''
 
+    severity=WARNING
+    
     def apply(self, testcase):
         if testcase.is_templated:
             return
