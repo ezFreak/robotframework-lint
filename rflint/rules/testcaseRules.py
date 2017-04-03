@@ -125,3 +125,25 @@ class ForLoopNotAllowedInTestCase(TestRule):
                             steps.startline)
             except IndexError:
                 pass
+
+class IfElseNotAllowedInTestCase(TestRule):
+    '''Workflow tests should have no IF/ELSE statement in test case.
+    A IF/ELSE statement should only be used in user keywords.
+
+    This rule is not enforced for data driven tests ("Test Template" in Settings)
+
+    https://github.com/robotframework/HowToWriteGoodTestCases/blob/master/HowToWriteGoodTestCases.rst#workflow-tests
+    '''
+
+    def apply(self, testcase):
+        if testcase.is_templated:
+            return
+
+        for steps in testcase.steps:
+            try:
+                if steps[1].lower() == 'IF'.lower():
+                    self.report(testcase,
+                            "Violation of using IF/ELSE in test case",
+                            steps.startline)
+            except IndexError:
+                pass
