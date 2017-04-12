@@ -65,3 +65,57 @@ class FileTooLong(GeneralRule):
             message = "File has too many lines (%s)" % len(lines)
             linenumber = self.max_allowed+1
             self.report(robot_file, message, linenumber, 0)
+
+class GlobalVariableIsNotAllUpperCase(GeneralRule):
+    '''Verify that all global variables are in capital letters.
+
+        A variable is considered global when it is accessible on a
+        global-, suite- or test level.
+
+        See: https://github.com/robotframework/HowToWriteGoodTestCases/blob/master/HowToWriteGoodTestCases.rst#variable-naming
+    '''
+
+    severity = WARNING
+
+    def apply(self, robot_file):
+        # Iterate through 'Variable' section
+        for row in robot_file.variables:
+            variable = row[0]
+            if (variable.isupper() is not True and 
+                variable.strip().startswith('#') is not True and
+                variable != ""):
+                message = "Violation of lower case character(s) in global variable %s" % variable
+                self.report(robot_file, message, row.linenumber) 
+
+        # Iterate through 'Test Cases' section
+        for testcase in robot_file.testcases:
+            self.report_bad_variable_naming(testcase.rows, robot_file)
+
+        # Iterate through 'Keyword' section
+        for keyword in robot_file.keywords:
+            self.report_bad_variable_naming(keyword.rows, robot_file)
+
+    def report_bad_variable_naming(self, rows, robot_file):
+        '''Iterates through all cells and verifies
+        that global variables has all capital letters.
+        '''
+        global_variable_found = False
+
+        extract_cell_gen = ((cell, row.linenumber) for row in rows for cell in row.cells)
+        for cell, linenumber in extract_cell_gen:
+            if cell == "..." or cell == "":
+                # Jump to next cell
+                continue
+
+            if  ((cell.lower() == "set global variable") or
+                (cell.lower() == "set suite variable") or
+                (cell.lower() == "set test variable")):
+                global_variable_found = True
+                # Next iteration will grab the variable name
+                continue
+
+            if global_variable_found:
+                if cell.isupper() is not True:
+                    message = "Violation of lower case character(s) in global variable %s" % cell
+                    self.report(robot_file, message, linenumber) 
+                global_variable_found = False

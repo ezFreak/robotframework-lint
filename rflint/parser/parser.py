@@ -237,6 +237,14 @@ class RobotFile(object):
             if isinstance(table, TestcaseTable):
                 for testcase in table.testcases:
                     yield testcase
+
+    @property
+    def variables(self):
+        ''''Generator which returns all variables from 'variable table' in the suite'''
+        for table in self.tables:
+            if isinstance(table, VariableTable):
+                for variable in table.rows:
+                    yield variable
         
     def dump(self):
         '''Regurgitate the tables and rows'''
