@@ -40,6 +40,7 @@ class RfLint(object):
         here = os.path.abspath(os.path.dirname(__file__))
         builtin_rules = os.path.join(here, "rules")
         site_rules = os.path.join(here, "site-rules")
+        self._extensions = []
 
         # mapping of class names to instances, to enable us to
         # instantiate each rule exactly once
@@ -140,8 +141,13 @@ class RfLint(object):
             if self.args.recursive:
                 for dirname in sorted(dirs):
                     self._process_folder(os.path.join(root, dirname))
- 
+
     def _process_file(self, filename):
+        # process files with accepeted extensions
+        file_extension = os.path.splitext(filename)[1][1:]
+        if not file_extension in self._extensions and self._extensions:
+            return
+
         # this is used by the reporting mechanism to know if it
         # should print the filename. Once it has been printed it
         # will be reset so that it won't get printed again until 
@@ -253,6 +259,8 @@ class RfLint(object):
                 "processed."
                 )
             )
+        parser.add_argument("--extension", "-E", metavar="RULENAME", action=SetExtensionAction,
+                            help="File extensions to analyse")
         parser.add_argument("--error", "-e", metavar="RULENAME", action=SetErrorAction,
                             help="Assign a severity of ERROR to the given RULENAME")
         parser.add_argument("--ignore", "-i", metavar="RULENAME", action=SetIgnoreAction,
@@ -293,6 +301,11 @@ class RfLint(object):
         Rule.output_format = args.format
 
         return args
+
+class SetExtensionAction(argparse.Action):
+    def __call__(self, parser, namespace, arg, option_string=None):
+        app = getattr(namespace, "app")
+        app._extensions.append(arg.replace(".", ""))
 
 
 class RulefileAction(argparse.Action):
