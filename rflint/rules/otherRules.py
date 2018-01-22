@@ -82,8 +82,7 @@ class GlobalVariableIsNotAllUpperCase(GeneralRule):
         for row in robot_file.variables:
             variable = row[0]
             if (variable.isupper() is not True and 
-                variable.strip().startswith('#') is not True and
-                variable != ""):
+                variable.strip().startswith('...') is not True):
                 message = "Violation of lower case character(s) in global variable %s" % variable
                 self.report(robot_file, message, row.linenumber) 
 

@@ -244,7 +244,8 @@ class RobotFile(object):
         for table in self.tables:
             if isinstance(table, VariableTable):
                 for variable in table.rows:
-                    yield variable
+                    if(variable[0] != "" and variable[0].strip().startswith('#') is not True):
+                        yield variable
         
     def dump(self):
         '''Regurgitate the tables and rows'''
